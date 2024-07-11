@@ -1,41 +1,40 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"os"
-
-	"github.com/google/generative-ai-go/genai"
-	"google.golang.org/api/option"
+	"Go-To-Jeju/services"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"time"
 )
 
+type msgStruct struct {
+	Message string `json:"message"`
+}
+
 func main() {
-	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey("AIzaSyAaON84YLb-CnrkcAMNhLvPi9hJyFX9j5A"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
+	r := gin.Default()
 
-	// Use Client.UploadFile to Upload a file to the service.
-	// Pass it an io.Reader.
-	f, err := os.Open("data/script.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	// You can choose a name, or pass the empty string to generate a unique one.
-	file, err := client.UploadFile(ctx, "", f, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// The return value's URI field should be passed to the model in a FileData part.
-	model := client.GenerativeModel("gemini-1.5-pro")
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowHeaders: []string{"Origin", "Content-Type"},
+		MaxAge:       24 * time.Hour,
+	}))
 
-	resp, err := model.GenerateContent(ctx, genai.FileData{URI: file.URI})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(resp)
+	r.POST("/chat", func(c *gin.Context) {
+		var msg msgStruct
+		err := c.ShouldBindJSON(&msg)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := services.ChatWithKikuri(msg.Message)
+		c.JSON(http.StatusOK, gin.H{
+			"message": resp,
+		})
+	})
+
+	r.Run(":8080")
 }

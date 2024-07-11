@@ -6,19 +6,16 @@ import (
 	"regexp"
 )
 
-func KikuriTxt() string {
+func KikuriPdf() string {
 	var filteredScript string
 	pattern := `（きくり）([^（|♪]*)`
 	r := regexp.MustCompile(pattern)
 
-	for i := 1; i <= 12; i++ {
-		filename := fmt.Sprintf("data/S%02d.txt", i)
-		content, err := ioutil.ReadFile(filename)
-		if err != nil {
-			fmt.Println("Error reading file:", err)
-			continue
-		}
-
+	filename := "data/kikuri-namu.txt"
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+	
 		text := string(content)
 		matches := r.FindAllStringSubmatch(text, -1)
 		for _, match := range matches {
