@@ -9,7 +9,6 @@ LLM과 함께하는 가사연애 도전기
   - github.com/gin-gonic/gin v1.10.0
   - github.com/google/generative-ai-go v0.16.0
   - github.com/joho/godotenv v1.5.1
-  - google.golang.org/api v0.188.0
 
 # 사용방법
 ```shell
